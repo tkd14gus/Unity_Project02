@@ -12,9 +12,17 @@ public class Bomb : MonoBehaviour
 
     public GameObject fxFactory;
 
+    private EnemyFSM ef;
+
     //충돌처리
     private void OnCollisionEnter(Collision collision)
     {
+        //if (collision.transform.name.Contains("Enemy"))
+        //{
+        //    ef = collision.transform.GetComponent<EnemyFSM>();
+        //    ef.HP -= 10;
+        //}
+
         //폭발임펙트 보여주기
         GameObject fx = Instantiate(fxFactory);
         fx.transform.position = transform.position;

@@ -11,6 +11,9 @@ public class PlayerFire : MonoBehaviour
     //public GameObject sparkFactory;
     public GameObject bulletImpactFactory;  //총알 임팩트 프리팹
     public GameObject boomFactory;
+
+    //private EnemyFSM ef;
+
     public float throwPower = 20.0f;        //던질 파워
 
     public float power = 5f;
@@ -61,6 +64,18 @@ public class PlayerFire : MonoBehaviour
             if(Physics.Raycast(ray, out hitInfo))
             {
                 print("충돌 오브젝트 : " + hitInfo.transform.name);
+
+                //if (hitInfo.transform.name.Contains("Enemy"))
+                //{
+                //    ef = hitInfo.transform.GetComponent<EnemyFSM>();
+                //    ef.HP -= 5;
+                //}
+
+                //내 총알에 충돌했으니 몬스터 체력 깎기
+                EnemyFSM enemy = hitInfo.collider.GetComponent<EnemyFSM>();
+                enemy.hitDamage(10);
+                //hitInfo.collider.gameObject.GetComponent<EnemyFSM>().hitDamage(10);
+                //hitInfo.transform.GetComponent<EnemyFSM>().hitDamage(10);
 
                 //충돌지점에 총알 임펙트 생성한다.
                 //총알 파편 임펙트 생성
