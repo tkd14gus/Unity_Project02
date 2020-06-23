@@ -67,8 +67,12 @@ public class EnemyFSM : MonoBehaviour
     public float moveRange = 30f; //시작 지점에서 최대 이동 가능한 범위
     public float attackRange = 2f; //공격 가능 범위
     Vector3 startPoint; //몬스터 시작위치
+    //Quaternion startRotation; //몬스터 시작 회전값
     Transform player; //플레이어를 찾기위해(안 그럼 모든 몬스터에 다 드래그앤드랍 해줘야 한다. 걍 코드로 찾아서 처리)
     CharacterController cc; //몬스터 이동을 위해 캐릭터 컨트롤러 필요
+
+    //애니메이션을 제어하기 위한 애니메이터 컴포넌트
+    Animator anim;
 
     //몬스터 일반 변수
     int hp = 100; //체력
@@ -91,10 +95,13 @@ public class EnemyFSM : MonoBehaviour
         //몬스터 상태 초기화
         state = EnemyState.Idle;
         startPoint = transform.position;
+        //startRotation = transform.rotation;
         //플레이어 트렌스폼 컴포넌트
         player = GameObject.Find("Player").transform;
         //캐릭터 컨트롤러 컴포넌트
         cc = GetComponent<CharacterController>();
+        //애니메이터 컴포너너트
+        anim = GetComponentInChildren<Animator>();
     }
     
     void Update()
@@ -155,6 +162,9 @@ public class EnemyFSM : MonoBehaviour
         {
             state = EnemyState.Move;
             print("상태전환 : Idle -> Move");
+
+            //애니메이션
+            anim.SetTrigger("Move");
         }
     }
 
@@ -221,6 +231,9 @@ public class EnemyFSM : MonoBehaviour
         {
             state = EnemyState.Return;
             print("상태전환 : Move -> Return");
+
+            //애니메이션
+            anim.SetTrigger("Return");
         }
         //리턴상태가 아니면 플레이어를 추격해야 한다.
         else if(Vector3.Distance(transform.position, player.position) > attackRange)
@@ -258,6 +271,7 @@ public class EnemyFSM : MonoBehaviour
         {
             state = EnemyState.Attack;
             print("상태전환 : Move -> Attack");
+            anim.SetTrigger("Attack");
         }
     }
 
@@ -296,7 +310,7 @@ public class EnemyFSM : MonoBehaviour
                 print("공격");
                 //플레이어의 필요한 스크립트를 가져와서 데미지를 주면 된다.
                 //player.GetComponent<PlayerMove>().hitDamage(att);
-
+                anim.SetTrigger("Attack");
                 //타이머 초기화
                 timer = 0f;
             }
@@ -305,6 +319,7 @@ public class EnemyFSM : MonoBehaviour
         {
             state = EnemyState.Move;
             print("상태전화 : Attack -> Move");
+            anim.SetTrigger("Move");
             //타이머 초기화
             timer = 0f;
         }
@@ -332,15 +347,21 @@ public class EnemyFSM : MonoBehaviour
         if(Vector3.Distance(transform.position, startPoint) > 0.1f)
         {
             Vector3 dir = (startPoint - transform.position).normalized;
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir), 10 * Time.deltaTime);
             cc.SimpleMove(dir * speed);
         }
         else
         {
             //위치값을 초기값으로
             transform.position = startPoint;
+            transform.rotation = Quaternion.identity;
+            //Quaternion.identity; => 쿼터니온 값을 0으로 바꿔준다.
 
             state = EnemyState.Idle;
             print("상태전화 : Return -> Idle");
+
+            //애니메이션
+            anim.SetTrigger("Idle");
         }
     }
 
@@ -349,7 +370,7 @@ public class EnemyFSM : MonoBehaviour
     {
         //예외처리
         //피격상태이거나, 죽은 상태일때는 데미지를 충첩으로 주지 않는다.
-        if (state == EnemyState.Damage || state == EnemyState.Idle) return;
+        if (state == EnemyState.Damage || state == EnemyState.Die) return;
 
         //체력 깎기
         hp -= value;
@@ -359,13 +380,13 @@ public class EnemyFSM : MonoBehaviour
         {
             state = EnemyState.Damage;
             print("상태전화 : AnyState -> Damage");
-            Damage();
+            anim.SetTrigger("Damaged");
         }
         else
         {
             state = EnemyState.Die;
             print("상태전화 : AnyState -> Die");
-            Die();
+            anim.SetTrigger("Die");
         }
     }
 
@@ -398,6 +419,7 @@ public class EnemyFSM : MonoBehaviour
 
         state = EnemyState.Move;
         print("상태전화 : Damage -> Move");
+        anim.SetTrigger("Move");
 
     }
 
@@ -458,6 +480,6 @@ public class EnemyFSM : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, findRange);
         //이동 가능한 최대 범위
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, moveRange);
+        Gizmos.DrawWireSphere(startPoint, moveRange);
     }
 }

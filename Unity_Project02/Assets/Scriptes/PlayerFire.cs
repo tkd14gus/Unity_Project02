@@ -72,7 +72,7 @@ public class PlayerFire : MonoBehaviour
                 //}
 
                 //내 총알에 충돌했으니 몬스터 체력 깎기
-                EnemyFSM enemy = hitInfo.collider.GetComponent<EnemyFSM>();
+                EnemyFSM enemy = hitInfo.transform.gameObject.GetComponent<EnemyFSM>();
                 enemy.hitDamage(10);
                 //hitInfo.collider.gameObject.GetComponent<EnemyFSM>().hitDamage(10);
                 //hitInfo.transform.GetComponent<EnemyFSM>().hitDamage(10);
