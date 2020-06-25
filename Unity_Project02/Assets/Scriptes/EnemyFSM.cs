@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 //몬스터 유한 상태 머신
 public class EnemyFSM : MonoBehaviour
@@ -70,6 +71,7 @@ public class EnemyFSM : MonoBehaviour
     //Quaternion startRotation; //몬스터 시작 회전값
     Transform player; //플레이어를 찾기위해(안 그럼 모든 몬스터에 다 드래그앤드랍 해줘야 한다. 걍 코드로 찾아서 처리)
     CharacterController cc; //몬스터 이동을 위해 캐릭터 컨트롤러 필요
+    private NavMeshAgent nma; //네이메쉬에이컨트
 
     //애니메이션을 제어하기 위한 애니메이터 컴포넌트
     Animator anim;
@@ -102,6 +104,7 @@ public class EnemyFSM : MonoBehaviour
         cc = GetComponent<CharacterController>();
         //애니메이터 컴포너너트
         anim = GetComponentInChildren<Animator>();
+        nma = GetComponent<NavMeshAgent>();
     }
     
     void Update()
@@ -240,7 +243,7 @@ public class EnemyFSM : MonoBehaviour
         {
             //플레이어를 추격
             //이동방향 (벡터의 뺄셈)
-            Vector3 dir = (player.position - transform.position).normalized;
+            //Vector3 dir = (player.position - transform.position).normalized;
             //dir.Normalize();
 
             //몬스터가 벡스텝으로 쫓아온다.
@@ -256,7 +259,7 @@ public class EnemyFSM : MonoBehaviour
             //transform.forward = Vector3.Lerp(transform.forward, dir, 10 * Time.deltaTime);
 
             //최종적으로 자연스럽게 회전처리를 하려면  결국 쿼터니온을 사용해야 한다.
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir),  10 * Time.deltaTime);
+            //transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir),  10 * Time.deltaTime);
 
             //캐릭터 컨트롤러를 이용해서 이동하기
             //cc.Move(dir * speed * Time.deltaTime);
@@ -265,7 +268,9 @@ public class EnemyFSM : MonoBehaviour
             //중력문제를 해결하기 위해서 심플무브를 사용한다.
             //심플무브는 최소한의 물리가 적용되어 중력문제를 해결할 수 있다.
             //단 내부적으로 시간처리를 하기 때문에 Time.deltaTime을 사용하지 않는다.
-            cc.SimpleMove(dir * speed);
+            //cc.SimpleMove(dir * speed);
+
+            nma.SetDestination(player.position);
         }
         else //공격범위 안에 들어옴
         {
@@ -346,9 +351,10 @@ public class EnemyFSM : MonoBehaviour
         //도착하면 대기 상태로 벼녕
         if(Vector3.Distance(transform.position, startPoint) > 0.1f)
         {
-            Vector3 dir = (startPoint - transform.position).normalized;
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir), 10 * Time.deltaTime);
-            cc.SimpleMove(dir * speed);
+            //Vector3 dir = (startPoint - transform.position).normalized;
+            //transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir), 10 * Time.deltaTime);
+            //cc.SimpleMove(dir * speed);
+            nma.SetDestination(startPoint);
         }
         else
         {

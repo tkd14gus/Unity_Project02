@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    public float speed = 3f;
+    public float speed = 6f;
     private CharacterController cc;
 
     //중력적용
